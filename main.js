@@ -1,58 +1,56 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
-import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 import './style.css'
 import javascriptLogo from './javascript.svg'
 import { setupCounter } from './counter.js'
 
-const mtlLoader = new MTLLoader();
+const gltfLoader = new GLTFLoader();
+let s = 1;
 
 const clock = new THREE.Clock()
 
-let guy;
+const baseYScale = 7.4;
 
-mtlLoader.load(
-  'blue.mtl',
-  function ( mtl ) {
-    const objLoader = new OBJLoader();
-    objLoader.setMaterials(mtl)
-    objLoader.load(
-      'blue.obj',
-      function ( object ) {
-        guy = object;
-        object.position.set(0, -4.5, 0)
-        scene.add( object );
-      },
-      function ( xhr ) {
-        console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-      },
-      function ( error ) {
-        console.log( 'An error happened', error );
-      }
-    );
+gltfLoader.load(
+  'noel.glb',
+  function ( gltf ) {
+    gltf.scene.position.set(0, 0, 1)
+    gltf.scene.scale.set(10, baseYScale, 10)
+    scene.add( gltf.scene );
+
+    function dance() {
+      gltf.scene.scale.set(10, baseYScale + Math.sin(clock.getElapsedTime()), 10)
+    }
+
+    function animate() {
+      requestAnimationFrame( animate );
+      dance();
+      controls.update();
+      renderer.render( scene, camera );
+    }
+    animate();
   },
-  // called when loading is in progresses
   function ( xhr ) {
     console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
   },
-  // called when loading has errors
   function ( error ) {
     console.log( 'An error happened', error );
   }
 );
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color( 0xeeaaFF );
+scene.background = new THREE.Color( 0x000000 );
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
-const ambientLight = new THREE.AmbientLight( 0xffffff, 2.0 );
+const ambientLight = new THREE.AmbientLight( 0xffffff, 1.5 );
 scene.add( ambientLight );
 
-const pointLight = new THREE.PointLight( 0xffffff, 3 );
+const pointLight = new THREE.PointLight( 0xffffff, 1.0 );
 pointLight.position.set(-10, 10, 0)
-camera.add( pointLight );
+//camera.add( pointLight );
+
 scene.add( camera );
 
 const renderer = new THREE.WebGLRenderer();
@@ -67,7 +65,7 @@ const cube = new THREE.Mesh( geometry, material );
 const controls = new OrbitControls( camera, renderer.domElement );
 
 controls.maxDistance = 200.0;
-controls.minDistance = 5.0;
+controls.minDistance = 10.0;
 //controls.maxZoom = 10.0;
 controls.rotateSpeed = 2.5;
 controls.zoomSpeed = 1.0;
@@ -81,19 +79,3 @@ controls.dampingFactor = 0.01;
 camera.position.z = 18;
 
 controls.update();
-
-
-function animate() {
-  requestAnimationFrame( animate );
-  // cube.rotation.x += 0.01;
-  // cube.rotation.y += 0.01;
-  if (guy) {
-    const counter = Math.floor(clock.getElapsedTime()*3)
-
-    const flip =  (counter % 2)*2-1;
-    guy.scale.z = flip;
-  }
-  controls.update();
-  renderer.render( scene, camera );
-}
-animate();
