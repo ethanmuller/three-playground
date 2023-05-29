@@ -18,7 +18,7 @@ const baseYScale = 7.4;
 gltfLoader.load(
   'noel.glb',
   function ( gltf ) {
-    gltf.scene.position.set(0, 0, 1)
+    gltf.scene.position.set(0, 0, -10)
     gltf.scene.scale.set(10, baseYScale, 10)
     scene.add( gltf.scene );
 
@@ -67,11 +67,6 @@ document.querySelector('#app').appendChild( renderer.domElement );
 
 renderer.xr.enabled = true;
 document.body.appendChild( VRButton.createButton( renderer ) );
-
-const geometry = new THREE.BoxGeometry( 1, 1, 1 );
-const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-const cube = new THREE.Mesh( geometry, material );
-scene.add( cube );
 
 const controls = new TrackballControls( camera, renderer.domElement );
 
