@@ -1,9 +1,10 @@
 // vite.config.js
 import { defineConfig } from 'vite'
-import mkcert from 'vite-plugin-mkcert'
+import basicSsl from '@vitejs/plugin-basic-ssl'
 
 export default defineConfig({
-  base: '',
-    server: { https: true },
-    plugins: [ mkcert() ],
+    base: '',
+    plugins: [
+        basicSsl()
+    ]
 })
