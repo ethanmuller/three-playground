@@ -1,6 +1,8 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { TrackballControls } from 'three/addons/controls/TrackballControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { VRButton } from 'three/addons/webxr/VRButton.js';
+
 
 import './style.css'
 import javascriptLogo from './javascript.svg'
@@ -21,7 +23,7 @@ gltfLoader.load(
     scene.add( gltf.scene );
 
     function dance() {
-      gltf.scene.scale.set(10, baseYScale + Math.sin(clock.getElapsedTime()), 10)
+      gltf.scene.scale.set( Math.cos(clock.getElapsedTime()*5/5) + 10, baseYScale + Math.sin(clock.getElapsedTime()*3/5), Math.cos(clock.getElapsedTime()*7/5)*1+10)
     }
 
     function animate() {
@@ -57,12 +59,15 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.querySelector('#app').appendChild( renderer.domElement );
 
+renderer.xr.enabled = true;
+document.body.appendChild( VRButton.createButton( renderer ) );
+
 const geometry = new THREE.BoxGeometry( 1, 1, 1 );
 const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
 const cube = new THREE.Mesh( geometry, material );
-//scene.add( cube );
+scene.add( cube );
 
-const controls = new OrbitControls( camera, renderer.domElement );
+const controls = new TrackballControls( camera, renderer.domElement );
 
 controls.maxDistance = 200.0;
 controls.minDistance = 10.0;
