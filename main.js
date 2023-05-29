@@ -1,87 +1,89 @@
 import * as THREE from 'three';
-import { TrackballControls } from 'three/addons/controls/TrackballControls.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
 import { VRButton } from 'three/addons/webxr/VRButton.js';
 
 
 import './style.css'
-import javascriptLogo from './javascript.svg'
-import { setupCounter } from './counter.js'
 
 const gltfLoader = new GLTFLoader();
-let s = 1;
 
 const clock = new THREE.Clock()
 
 const baseYScale = 7.4;
 
-gltfLoader.load(
-  'noel.glb',
-  function ( gltf ) {
-    gltf.scene.position.set(0, 0, -10)
-    gltf.scene.scale.set(10, baseYScale, 10)
-    scene.add( gltf.scene );
+const objLoader = new OBJLoader();
 
-    function dance() {
-      gltf.scene.scale.set( Math.cos(clock.getElapsedTime()*5/5) + 10, baseYScale + Math.sin(clock.getElapsedTime()*3/5), Math.cos(clock.getElapsedTime()*7/5)*1+10)
-    }
+const mtlLoader = new MTLLoader();
 
-    function animate() {
-      requestAnimationFrame( animate );
-      dance();
-      controls.update();
-      renderer.render( scene, camera );
-    }
-    animate();
+mtlLoader.load('slime.mtl', (mtl) => {
+    mtl.preload();
+    objLoader.setMaterials(mtl);
+    objLoader.load('slime.obj', (root) => {
+        root.position.y -= 0.2;
+        scene.add(root);
 
-    renderer.setAnimationLoop( function () {
-      dance();
-      controls.update();
-      renderer.render( scene, camera );
-    } );
-  },
-  function ( xhr ) {
-    console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-  },
-  function ( error ) {
-    console.log( 'An error happened', error );
-  }
-);
+        function dance() {
+            const t = clock.getElapsedTime()*3;
+            const x =  1 + 0.1 * Math.cos(t);
+            const y =  1 + 0.1 * Math.sin(t);
+            const z =  1 + 0.1 * Math.cos(t);
+            root.scale.set(x, y, z)
+        }
+
+        function animate() {
+            requestAnimationFrame( animate );
+            dance();
+            controls.update();
+            renderer.render( scene, camera );
+        }
+        animate();
+
+        renderer.setAnimationLoop( function () {
+            dance();
+            controls.update();
+            renderer.render( scene, camera );
+        } );
+    });
+});
+
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color( 0x000000 );
+scene.background = new THREE.Color( 0x22aa00 );
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
-const ambientLight = new THREE.AmbientLight( 0xffffff, 1.5 );
+const ambientLight = new THREE.AmbientLight( 0xffffff, 3 );
 scene.add( ambientLight );
 
 const pointLight = new THREE.PointLight( 0xffffff, 1.0 );
-pointLight.position.set(-10, 10, 0)
-//camera.add( pointLight );
+pointLight.position.set(-10, 10, -10)
+camera.add( pointLight );
 
 scene.add( camera );
 
-const renderer = new THREE.WebGLRenderer();
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.querySelector('#app').appendChild( renderer.domElement );
 
 renderer.xr.enabled = true;
-document.body.appendChild( VRButton.createButton( renderer ) );
+//document.body.appendChild( VRButton.createButton( renderer ) );
 
-const controls = new TrackballControls( camera, renderer.domElement );
+const controls = new OrbitControls( camera, renderer.domElement );
 
-controls.maxDistance = 200.0;
-controls.minDistance = 10.0;
+controls.maxDistance = 10.0;
+controls.minDistance = 3.0;
 //controls.maxZoom = 10.0;
 controls.rotateSpeed = 2.5;
 controls.zoomSpeed = 1.0;
 controls.enablePan = false;
-controls.autoRotate = true;
+controls.autoRotate = false;
 controls.autoRotateSpeed = 5.0;
 controls.enableDamping = true;
 controls.dampingFactor = 0.01;
 //controls.dynamicDampingFactor = 0.05;
 
-camera.position.z = 18;
+camera.position.z = 4;
 
 controls.update();
