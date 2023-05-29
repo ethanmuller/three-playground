@@ -33,6 +33,12 @@ gltfLoader.load(
       renderer.render( scene, camera );
     }
     animate();
+
+    renderer.setAnimationLoop( function () {
+      dance();
+      controls.update();
+      renderer.render( scene, camera );
+    } );
   },
   function ( xhr ) {
     console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
